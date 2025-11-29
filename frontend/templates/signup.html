@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% block title %}Signup — Pixerase.AI{% endblock %}
+
+{% block content %}
+<section class="auth-section">
+  <div class="auth-card">
+    <h2>Create an account</h2>
+    <p class="muted">Join Pixerase.AI</p>
+
+    <form id="signupForm">
+      <label>Full Name
+        <input type="text" id="signupName" placeholder="Enter your name" required>
+      </label>
+
+      <label>Email
+        <input type="email" id="signupEmail" placeholder="Enter your email" required>
+      </label>
+
+      <label>Password
+        <input type="password" id="signupPassword" placeholder="Choose a password" required>
+      </label>
+
+      <button class="btn btn-primary" style="width:100%; margin-top:12px;">Create Account</button>
+
+      <p class="muted" style="margin-top:14px;">
+        Already have an account?
+        <a href="{{ url_for('login_page') }}" class="accent-text">Login</a>
+      </p>
+    </form>
+
+    <p id="signupMessage" style="color:red; margin-top:10px;"></p>
+  </div>
+</section>
+
+<script src="/static/js/auth.js"></script>
+{% endblock %}

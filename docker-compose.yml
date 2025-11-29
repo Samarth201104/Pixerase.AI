@@ -1,0 +1,25 @@
+services:
+  db:
+    image: postgres:15
+    container_name: pixerase_db
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: Samu@2030
+      POSTGRES_DB: pix_erase
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+  backend:
+    build: .
+    container_name: pixerase_backend
+    depends_on:
+      - db
+    env_file:
+      - .env
+    ports:
+      - "5000:5000"
+
+volumes:
+  pgdata:

@@ -1,0 +1,14 @@
+.venv
+venv
+__pycache__
+*.pyc
+*.pyo
+*.pyd
+.git
+node_modules
+*.zip
+*.tar
+*.log
+uploads
+outputs
+models/

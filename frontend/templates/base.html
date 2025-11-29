@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>{% block title %}Pixerase.AI{% endblock %}</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+  {% block head %}{% endblock %}
+</head>
+<body>
+  <nav class="navbar">
+    <div class="nav-inner">
+      <a class="logo" href="{{ url_for('index_page') }}">
+        Pixerase.<span class="accent">AI</span>
+      </a>
+
+      <ul class="nav-links">
+        <li><a href="{{ url_for('index_page') }}">Home</a></li>
+        <li><a href="{{ url_for('background_page') }}">Background Removal</a></li>
+        <li><a href="{{ url_for('object_page') }}">Object Removal</a></li>
+      </ul>
+
+      <!-- ✅ FIXED NAV ACTIONS -->
+      <div class="nav-actions">
+
+        <!-- Login / Signup Buttons -->
+        <a id="loginBtn" class="btn btn-outline" href="{{ url_for('login_page') }}">Login</a>
+        <a id="signupBtn" class="btn btn-primary" href="{{ url_for('signup_page') }}">Signup</a>
+
+        <!-- ✅ Profile Dropdown -->
+        <div class="dropdown" id="profileDropdown" style="display:none; position:relative;">
+          <button class="btn btn-outline" id="profileToggle">
+            <span id="userName"></span> ▼
+          </button>
+
+          <div class="dropdown-menu" id="dropdownMenu">
+            <p id="userEmail" class="dropdown-text"></p>
+            <a href="/dashboard" class="dropdown-link">Dashboard</a>
+            <button id="logoutBtn" class="dropdown-link">Logout</button>
+          </div>
+        </div>
+
+      </div>
+      <!-- ✅ END FIX -->
+
+      <button class="nav-toggle" aria-label="Open menu">
+        <span class="hamburger"></span>
+      </button>
+    </div>
+  </nav>
+
+  <main>
+    {% block content %}{% endblock %}
+  </main>
+
+  {% block footer %}{% endblock %}
+
+  <!-- Scripts -->
+  <script defer src="{{ url_for('static', filename='js/navbar.js') }}"></script>
+  <script defer src="{{ url_for('static', filename='js/home.js') }}"></script>
+  <script defer src="{{ url_for('static', filename='js/background.js') }}"></script>
+  <script defer src="{{ url_for('static', filename='js/object.js') }}"></script>
+
+  <!-- ✅ AUTH SCRIPTS -->
+  <script defer src="{{ url_for('static', filename='js/jwt_test.js') }}"></script>
+  <script defer src="{{ url_for('static', filename='js/profile.js') }}"></script>
+  <script defer src="{{ url_for('static', filename='js/protect-pages.js') }}"></script>
+
+</body>
+</html>

@@ -1,0 +1,117 @@
+{% extends "base.html" %}
+{% block title %}Pixerase.AI — Home{% endblock %}
+{% block content %}
+<section class="hero full-width-hero">
+  <div class="container hero-grid">
+    <div class="hero-left">
+      <h1>Remove backgrounds & unwanted objects — fast, clean, and smart.</h1>
+      <p class="sub">AI-powered image editing for creators. Upload, edit, and download in seconds.</p>
+
+      <div class="hero-cta">
+        <a href="{{ url_for('background_page') }}" class="btn btn-primary">Try Background Removal</a>
+        <a href="{{ url_for('object_page') }}" class="btn btn-outline">Try Object Removal</a>
+      </div>
+
+      <ul class="features">
+        <li><strong>Fast</strong> — real-time processing</li>
+        <li><strong>Accurate</strong> — clean edges & content-aware fills</li>
+        <li><strong>Templates</strong> — built-in backgrounds & custom uploads</li>
+      </ul>
+    </div>
+
+    <div class="hero-right">
+      <div class="uploader-card">
+        <h4>Upload an image</h4>
+        <label class="drop-area" id="homeDrop">
+          <input id="homeFile" type="file" accept="image/*" hidden>
+          <div class="drop-inner">
+            <button id="homeSelectBtn" class="btn btn-ghost">Select Image</button>
+            <p class="muted">or drag & drop here</p>
+            <p class="muted small">PNG, JPG, JPEG, WebP — up to 10MB</p>
+          </div>
+        </label>
+
+        <img id="homePreview" class="home-preview" alt="Preview" style="display:none;"/>
+
+        <div class="hero-upload-actions">
+          <button id="goBgBtn" class="btn btn-primary">Go to Background</button>
+          <button id="goObjBtn" class="btn btn-outline">Go to Object</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="how container">
+  <h2>How it works</h2>
+  <div class="steps">
+    <div class="card"><div class="num">1</div><h3>Upload</h3><p>Drop or select an image.</p></div>
+    <div class="card"><div class="num">2</div><h3>Edit</h3><p>Remove background or mark objects to erase.</p></div>
+    <div class="card"><div class="num">3</div><h3>Download</h3><p>Apply templates and download.</p></div>
+  </div>
+</section>
+
+<section class="why-section container">
+  <h2 class="section-title">Why Pixerase.AI</h2>
+  <div class="why-grid">
+    <div class="why-card"><h4>Speed</h4><p>Optimized for fast results.</p></div>
+    <div class="why-card"><h4>Quality</h4><p>High-fidelity masks and inpainting.</p></div>
+    <div class="why-card"><h4>Flexible</h4><p>Templates, custom uploads, and brush/box tools.</p></div>
+  </div>
+</section>
+
+<section class="formats container">
+  <h2 class="section-title">Supported formats</h2>
+  <p class="muted center">PNG, JPG, JPEG, WebP — up to 10MB</p>
+</section>
+
+<section class="cta-banner container">
+  <h2>Start editing smarter with Pixerase.AI</h2>
+  <a href="{{ url_for('background_page') }}" class="btn btn-primary btn-large">Start Now</a>
+</section>
+{% endblock %}
+
+{% block footer %}
+<footer class="full-footer">
+  <div class="container footer-grid">
+
+    <!-- Brand -->
+    <div class="footer-col footer-brand">
+      <div class="footer-logo">Makhija Quantum AI</div>
+      <p class="footer-tagline">AI tools for creators — background removal & object removal made simple.</p>
+    </div>
+
+    <!-- Tools -->
+    <div class="footer-col">
+      <h4 class="footer-title">Tools</h4>
+      <ul>
+        <li><a href="{{ url_for('background_page') }}">Background Removal</a></li>
+        <li><a href="{{ url_for('object_page') }}">Object Removal</a></li>
+      </ul>
+    </div>
+
+    <!-- Company -->
+    <div class="footer-col">
+      <h4 class="footer-title">Company</h4>
+      <ul>
+        <li><a href="#">About</a></li>
+        <li><a href="#">Contact</a></li>
+      </ul>
+    </div>
+
+    <!-- Legal -->
+    <div class="footer-col">
+      <h4 class="footer-title">Legal</h4>
+      <ul>
+        <li><a href="#">Terms</a></li>
+        <li><a href="#">Privacy</a></li>
+      </ul>
+    </div>
+
+  </div>
+
+  <div class="footer-bottom">
+    <small>© 2025 Makhija Quantum AI — All rights reserved.</small>
+  </div>
+</footer>
+{% endblock %}
