@@ -19,6 +19,7 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 # Copy full project
 COPY . .
+COPY background/models/u2net.pth background/models/u2net.pth
 
 EXPOSE 5000
 
