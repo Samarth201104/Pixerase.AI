@@ -42,6 +42,8 @@ class ImageApiTests(unittest.TestCase):
         self.assertEqual(response.status_code, 400)
 
     def test_frontend_pages_are_served(self):
-        response = self.client.get("/")
-        self.assertEqual(response.status_code, 200)
-        response.close()
+        for path in ("/", "/background", "/object"):
+            with self.subTest(path=path):
+                response = self.client.get(path)
+                self.assertEqual(response.status_code, 200)
+                response.close()

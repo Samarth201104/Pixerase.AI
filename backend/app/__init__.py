@@ -25,6 +25,14 @@ def create_app(config_object=Config):
     def index():
         return send_from_directory(frontend_dir, "index.html")
 
+    @app.get("/background")
+    def background_page():
+        return send_from_directory(frontend_dir, "background.html")
+
+    @app.get("/object")
+    def object_page():
+        return send_from_directory(frontend_dir, "object.html")
+
     @app.after_request
     def security_headers(response):
         response.headers.setdefault("X-Content-Type-Options", "nosniff")
