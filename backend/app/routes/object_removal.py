@@ -2,9 +2,9 @@ import logging
 
 from flask import Blueprint, current_app, jsonify, request, send_file
 
-from app.image_validation import ImageValidationError, read_image
 from app.services.file_service import TemporaryWorkspace
 from app.services.image_processing import remove_object as process_object
+from app.utils.image_validation import ImageValidationError, read_image
 
 logger = logging.getLogger(__name__)
 object_bp = Blueprint("object_removal", __name__)

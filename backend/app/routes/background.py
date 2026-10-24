@@ -2,9 +2,9 @@ import logging
 
 from flask import Blueprint, current_app, jsonify, request, send_file
 
-from app.image_validation import ImageValidationError, read_image, read_optional_background
 from app.services.file_service import TemporaryWorkspace
 from app.services.image_processing import remove_background as process_background
+from app.utils.image_validation import ImageValidationError, read_image, read_optional_background
 
 logger = logging.getLogger(__name__)
 background_bp = Blueprint("background", __name__)

@@ -42,4 +42,6 @@ class ImageApiTests(unittest.TestCase):
         self.assertEqual(response.status_code, 400)
 
     def test_frontend_pages_are_served(self):
-        self.assertEqual(self.client.get("/").status_code, 200)
+        response = self.client.get("/")
+        self.assertEqual(response.status_code, 200)
+        response.close()
