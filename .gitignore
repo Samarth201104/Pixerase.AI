@@ -1,19 +1,41 @@
-# Python
-venv/
-__pycache__/
-*.pyc
+# Environment and credentials
+.env
+.env.*
+!.env.example
 
-# Node / Frontend (if used)
+# Python
+__pycache__/
+*.py[cod]
+*.pyd
+.venv/
+venv/
+ENV/
+*.egg-info/
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Runtime-generated image files
+uploads/
+outputs/
+results/
+*.tmp
+*.log
+
+# Model caches and generated artifacts
+*.onnx
+*.engine
+*.cache
+backend/app/models/**/weights/
+
+# Frontend tooling
 node_modules/
 .next/
 dist/
 
-# Environment variables
-.env
-
-# OS
+# Editors and operating systems
+.vscode/
+.idea/
 .DS_Store
 Thumbs.db
-
-# Outputs
-output/
+desktop.ini

@@ -1,2 +1,0 @@
-# Pixerase.AI
-New Repo
