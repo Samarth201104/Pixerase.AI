@@ -14,9 +14,10 @@ document.addEventListener("DOMContentLoaded", () => {
   let isDrawing = false;
   let start = null;
   let current = null;
-  let selection = null;
+  let selections = [];
   let brushColor = "paint";
   let brushWidth = 32;
+  const maxRectangles = 20;
   let marks = [];
   let redoMarks = [];
   const undoBtn = document.getElementById("undoObjBtn");
@@ -27,7 +28,7 @@ document.addEventListener("DOMContentLoaded", () => {
   function history() { undoBtn.disabled = !marks.length; redoBtn.disabled = !redoMarks.length; }
   function drawAction(action) {
     if (action.type === "rect") {
-      selection = action.rect;
+      selections.push(action.rect);
       const [x, y, width, height] = action.rect;
       ctx.fillStyle = "rgba(255,56,96,.12)"; ctx.fillRect(x, y, width, height); ctx.strokeStyle = "#ff3860"; ctx.lineWidth = Math.max(2, canvas.width / 700); ctx.setLineDash([8, 5]); ctx.strokeRect(x, y, width, height); ctx.setLineDash([]);
       return;
@@ -44,7 +45,7 @@ document.addEventListener("DOMContentLoaded", () => {
   }
   function redraw() {
     ctx.clearRect(0, 0, canvas.width, canvas.height); maskCtx.clearRect(0, 0, mask.width, mask.height);
-    maskCtx.fillStyle = "black"; maskCtx.fillRect(0, 0, mask.width, mask.height); selection = null;
+    maskCtx.fillStyle = "black"; maskCtx.fillRect(0, 0, mask.width, mask.height); selections = [];
     marks.forEach(drawAction);
   }
   function clearCanvases() {
@@ -53,7 +54,7 @@ document.addEventListener("DOMContentLoaded", () => {
     maskCtx.clearRect(0, 0, mask.width, mask.height);
     maskCtx.fillStyle = "black";
     maskCtx.fillRect(0, 0, mask.width, mask.height);
-    marks = []; redoMarks = []; current = null; selection = null; history();
+    marks = []; redoMarks = []; current = null; selections = []; history();
   }
   function alignCanvas() {
     if (!image.naturalWidth || !image.isConnected) return;
@@ -81,7 +82,7 @@ document.addEventListener("DOMContentLoaded", () => {
       clearCanvases();
       alignCanvas();
     };
-    Pixerase.setStatus(status, "Choose Rectangle or Brush, then mark the object.");
+    Pixerase.setStatus(status, "Mark one or more objects with separate rectangles, or use the brush.");
   }
   document.getElementById("objSelect")?.addEventListener("click", event => { event.preventDefault(); event.stopPropagation(); input.click(); });
   document.getElementById("objSelect")?.addEventListener("keydown", event => { if (["Enter", " "].includes(event.key)) input.click(); });
@@ -136,15 +137,23 @@ document.addEventListener("DOMContentLoaded", () => {
   function finish(event) {
     if (!isDrawing) return;
     isDrawing = false;
+    let rectangleLimitReached = false;
     if (mode === "rect" && start && current) {
       const x = Math.floor(Math.min(start.x, current.x)), y = Math.floor(Math.min(start.y, current.y)), width = Math.max(1, Math.round(Math.abs(current.x - start.x))), height = Math.max(1, Math.round(Math.abs(current.y - start.y)));
       const rect = width > 2 && height > 2 ? [x, y, width, height] : null;
-      if (rect) marks.push({ type: "rect", rect });
+      if (rect && marks.filter(mark => mark.type === "rect").length < maxRectangles) marks.push({ type: "rect", rect });
+      else if (rect) rectangleLimitReached = true;
     } else if (mode === "brush" && currentAction) marks.push(currentAction);
     if (start && current) { redoMarks = []; history(); }
     redraw();
     start = current = null;
     currentAction = null;
+    if (rectangleLimitReached) {
+      Pixerase.setStatus(status, `You can mark up to ${maxRectangles} areas per image.`, "error");
+    } else if (mode === "rect" && selections.length) {
+      const count = selections.length;
+      Pixerase.setStatus(status, `${count} area${count === 1 ? "" : "s"} marked. Draw more boxes to remove multiple objects together.`);
+    }
     if (event?.pointerId !== undefined && canvas.hasPointerCapture(event.pointerId)) canvas.releasePointerCapture(event.pointerId);
   }
   let currentAction = null;
@@ -156,8 +165,8 @@ document.addEventListener("DOMContentLoaded", () => {
     if (!sourceFile) { Pixerase.setStatus(status, "Choose an image to continue.", "error"); return; }
     const form = new FormData(); form.append("image", sourceFile, sourceFile.name);
     if (mode === "rect") {
-      if (!selection) { Pixerase.setStatus(status, "Draw a rectangle around the object first.", "error"); return; }
-      form.append("mode", "rect"); form.append("rect", selection.join(",")); form.append("canvas_w", String(canvas.width)); form.append("canvas_h", String(canvas.height));
+      if (!selections.length) { Pixerase.setStatus(status, "Draw a rectangle around each object you want removed.", "error"); return; }
+      form.append("mode", "rect"); form.append("rects", JSON.stringify(selections)); form.append("canvas_w", String(canvas.width)); form.append("canvas_h", String(canvas.height));
     } else {
       const pixels = maskCtx.getImageData(0, 0, mask.width, mask.height).data;
       if (!pixels.some((value, index) => index % 4 === 0 && value > 0)) { Pixerase.setStatus(status, "Paint over the object before processing.", "error"); return; }

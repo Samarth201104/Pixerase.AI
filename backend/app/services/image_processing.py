@@ -23,7 +23,7 @@ def remove_background(image, background, config):
 
 
 def remove_object(image_path, mask_path, output_path, mode, rect, canvas_size, model_path):
-    from app.models.object.infer import grabcut_with_brush, grabcut_with_rect, run_migan_inference
+    from app.models.object.infer import grabcut_with_brush, grabcut_with_rects, run_migan_inference
 
     if mode == "brush":
         if not mask_path:
@@ -32,15 +32,20 @@ def remove_object(image_path, mask_path, output_path, mode, rect, canvas_size, m
     else:
         if not rect or not canvas_size or canvas_size[0] <= 0 or canvas_size[1] <= 0:
             raise ValueError("Draw a selection around the object before processing.")
-        x, y, width, height = rect
+        rectangles = rect if isinstance(rect[0], (list, tuple)) else [rect]
         with Image.open(image_path) as image:
             image_width, image_height = image.size
         scale_x, scale_y = image_width / canvas_size[0], image_height / canvas_size[1]
-        x1, y1 = int(x * scale_x), int(y * scale_y)
-        x2, y2 = int((x + width) * scale_x), int((y + height) * scale_y)
-        x1, y1 = max(0, x1), max(0, y1)
-        x2, y2 = min(image_width, x2), min(image_height, y2)
-        if x2 <= x1 or y2 <= y1:
+        image_rectangles = []
+        for x, y, width, height in rectangles:
+            x1, y1 = int(x * scale_x), int(y * scale_y)
+            x2, y2 = int((x + width) * scale_x), int((y + height) * scale_y)
+            x1, y1 = max(0, x1), max(0, y1)
+            x2, y2 = min(image_width, x2), min(image_height, y2)
+            if x2 <= x1 or y2 <= y1:
+                continue
+            image_rectangles.append([x1, y1, x2 - x1, y2 - y1])
+        if not image_rectangles:
             raise ValueError("Select an area inside the image.")
-        final_mask = grabcut_with_rect(str(image_path), [x1, y1, x2 - x1, y2 - y1])
+        final_mask = grabcut_with_rects(str(image_path), image_rectangles)
     return run_migan_inference(models.object(model_path), str(image_path), final_mask, str(output_path), device=models.device())

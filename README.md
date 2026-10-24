@@ -45,9 +45,9 @@ The original model weight files remain under `backend/app/models/background/mode
 
 - `GET /api/health` — process health check.
 - `POST /api/remove-background` — multipart `image`, optionally `background` or `bg_template`; returns a PNG.
-- `POST /api/remove-object` — multipart `image` and either `mode=rect` plus `rect`, `canvas_w`, `canvas_h`, or `mode=brush` plus `mask`; returns a PNG.
+- `POST /api/remove-object` — multipart `image` and either `mode=rect` plus `rects` (JSON list of up to 20 rectangles), `canvas_w`, `canvas_h`, or `mode=brush` plus `mask`; returns a PNG. The previous single `rect` field remains supported for existing clients.
 
-All image endpoints are public and stateless. Inputs, masks, and result files are stored in a unique system temporary directory during the request and removed when the response closes. The frontend holds preview blobs in memory only. Uploads are capped at 10 MB and 12 million pixels by default.
+All image endpoints are public and stateless. Inputs, masks, and result files are stored in a unique system temporary directory during the request and removed when the response closes. The frontend holds preview blobs in memory only. Uploads are capped at 25 MB and 12 million pixels by default.
 
 ## Configuration
 
@@ -56,7 +56,7 @@ All image endpoints are public and stateless. Inputs, masks, and result files ar
 | Variable | Purpose | Default |
 | --- | --- | --- |
 | `FLASK_DEBUG` | Enable Flask debug mode for local development | `false` |
-| `MAX_UPLOAD_SIZE` | Maximum bytes for each uploaded image | `10485760` |
+| `MAX_UPLOAD_SIZE` | Maximum bytes for each uploaded image | `26214400` |
 | `MAX_IMAGE_PIXELS` | Maximum decoded image pixel count | `12000000` |
 | `CORS_ORIGINS` | Comma-separated allowed frontend origins | `*` |
 | `BACKGROUND_MODEL_PATH` | Optional U²-Net weights override | bundled model path |

@@ -1,5 +1,5 @@
 (() => {
-  const maxBytes = 10 * 1024 * 1024;
+  const maxBytes = 25 * 1024 * 1024;
   const types = new Set(["image/jpeg", "image/png", "image/webp"]);
   const base = (window.APP_CONFIG?.apiBaseUrl || "").replace(/\/$/, "");
   function setStatus(target, message, kind = "") {

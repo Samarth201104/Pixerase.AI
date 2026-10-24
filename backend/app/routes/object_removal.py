@@ -1,4 +1,5 @@
 import logging
+import json
 
 from flask import Blueprint, current_app, jsonify, request, send_file
 
@@ -8,6 +9,7 @@ from app.utils.image_validation import ImageValidationError, read_image
 
 logger = logging.getLogger(__name__)
 object_bp = Blueprint("object_removal", __name__)
+MAX_RECTANGLE_SELECTIONS = 20
 
 
 def _error(message, code, status):
@@ -24,11 +26,30 @@ def remove_object():
             raise ValueError("Choose rectangle or brush selection mode.")
         rect, canvas_size = None, None
         if mode == "rect":
-            values = [int(part) for part in request.form.get("rect", "").split(",")]
-            if len(values) != 4:
-                raise ValueError("Draw a selection around the object before processing.")
-            x, y, width, height = values
-            rect = [min(x, x + width), min(y, y + height), abs(width), abs(height)]
+            raw_rects = request.form.get("rects")
+            if raw_rects:
+                try:
+                    values_list = json.loads(raw_rects)
+                except json.JSONDecodeError as exc:
+                    raise ValueError("The object selections are invalid. Please draw the boxes again.") from exc
+                if not isinstance(values_list, list) or not values_list:
+                    raise ValueError("Draw a rectangle around each object you want removed.")
+                if len(values_list) > MAX_RECTANGLE_SELECTIONS:
+                    raise ValueError(f"Select no more than {MAX_RECTANGLE_SELECTIONS} areas at once.")
+            else:
+                raw_rect = request.form.get("rect", "")
+                legacy_values = [int(part) for part in raw_rect.split(",")] if raw_rect else []
+                values_list = [legacy_values] if len(legacy_values) == 4 else []
+            if not values_list:
+                raise ValueError("Draw a rectangle around each object you want removed.")
+            rect = []
+            for values in values_list:
+                if not isinstance(values, list) or len(values) != 4:
+                    raise ValueError("Each object selection must be a rectangle with four coordinates.")
+                x, y, width, height = [int(part) for part in values]
+                if width == 0 or height == 0:
+                    raise ValueError("Each selection must have a visible width and height.")
+                rect.append([min(x, x + width), min(y, y + height), abs(width), abs(height)])
             canvas_size = (int(request.form.get("canvas_w", "0")), int(request.form.get("canvas_h", "0")))
         workspace = TemporaryWorkspace()
         try:

@@ -2,6 +2,7 @@ import io
 import unittest
 from unittest.mock import patch
 
+from flask import Response
 from PIL import Image
 
 from app import create_app
@@ -40,6 +41,25 @@ class ImageApiTests(unittest.TestCase):
             "image": (self.image_upload(), "image.png"), "mode": "invalid",
         })
         self.assertEqual(response.status_code, 400)
+
+    def test_object_route_passes_all_rectangle_selections(self):
+        def write_result(_source, _mask, output, _mode, _rectangles, _canvas_size, _model):
+            Image.new("RGB", (8, 8), "white").save(output)
+
+        with patch("app.routes.object_removal.process_object", side_effect=write_result) as process, patch(
+            "app.routes.object_removal.send_file", return_value=Response(b"processed")
+        ):
+            response = self.client.post("/api/remove-object", data={
+                "image": (self.image_upload(), "image.png"),
+                "mode": "rect",
+                "rects": "[[1, 2, 3, 4], [5, 6, 7, 8]]",
+                "canvas_w": "8",
+                "canvas_h": "8",
+            }, buffered=True)
+            self.assertEqual(response.status_code, 200)
+            self.assertEqual(process.call_args.args[4], [[1, 2, 3, 4], [5, 6, 7, 8]])
+            self.assertTrue(response.get_data())
+            response.close()
 
     def test_frontend_pages_are_served(self):
         for path in ("/", "/background", "/object"):

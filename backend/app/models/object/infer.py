@@ -25,27 +25,41 @@ def make_multiple_of_8(x):
 # GrabCut (rect)
 # -------------------------
 def grabcut_with_rect(image_path, rect, iter_count=5):
+    return grabcut_with_rects(image_path, [rect], iter_count)
+
+
+def grabcut_with_rects(image_path, rects, iter_count=5):
     image = cv2.imread(image_path)
     if image is None:
         raise FileNotFoundError(f"Image not found: {image_path}")
 
-    mask = np.zeros(image.shape[:2], np.uint8)
-    bgdModel = np.zeros((1, 65), np.float64)
-    fgdModel = np.zeros((1, 65), np.float64)
-
-    cv2.grabCut(image, mask, tuple(rect), bgdModel, fgdModel,
-                iter_count, cv2.GC_INIT_WITH_RECT)
-
-    mask2 = np.where((mask == 2) | (mask == 0), 0, 1).astype("uint8") * 255
-
-    filled = binary_fill_holes(mask2 > 0).astype(np.uint8)
+    combined_mask = np.zeros(image.shape[:2], np.uint8)
     kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (7, 7))
-    closed = cv2.morphologyEx(filled, cv2.MORPH_CLOSE, kernel, iterations=3)
-    dilated = cv2.dilate(closed, kernel, iterations=3)
-    final_mask = (dilated * 255).astype(np.uint8)
+    height, width = image.shape[:2]
+
+    for rect in rects:
+        x, y, rect_width, rect_height = [int(value) for value in rect]
+        x1, y1 = max(0, x), max(0, y)
+        x2, y2 = min(width, x + rect_width), min(height, y + rect_height)
+        if x2 <= x1 or y2 <= y1:
+            continue
+        mask = np.zeros(image.shape[:2], np.uint8)
+        bgd_model = np.zeros((1, 65), np.float64)
+        fgd_model = np.zeros((1, 65), np.float64)
+        cv2.grabCut(image, mask, (x1, y1, x2 - x1, y2 - y1), bgd_model, fgd_model,
+                    iter_count, cv2.GC_INIT_WITH_RECT)
+
+        mask2 = np.where((mask == 2) | (mask == 0), 0, 1).astype("uint8") * 255
+        filled = binary_fill_holes(mask2 > 0).astype(np.uint8)
+        closed = cv2.morphologyEx(filled, cv2.MORPH_CLOSE, kernel, iterations=3)
+        dilated = cv2.dilate(closed, kernel, iterations=3)
+        combined_mask = np.maximum(combined_mask, (dilated * 255).astype(np.uint8))
+
+    if not np.any(combined_mask):
+        raise ValueError("Select at least one area inside the image.")
 
     mask_path = os.path.splitext(image_path)[0] + "_mask.png"
-    cv2.imwrite(mask_path, final_mask)
+    cv2.imwrite(mask_path, combined_mask)
     return mask_path
 
 
