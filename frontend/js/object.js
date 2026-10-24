@@ -70,7 +70,9 @@ document.addEventListener("DOMContentLoaded", () => {
     sourceFile = file;
     image.src = URL.createObjectURL(file);
     image.style.display = "block";
+    image.parentElement.classList.add("has-preview");
     result.style.display = "none";
+    result.parentElement.classList.remove("has-preview");
     document.getElementById("downloadObjBtn").disabled = true;
     image.onload = () => {
       canvas.width = mask.width = image.naturalWidth;
@@ -168,13 +170,13 @@ document.addEventListener("DOMContentLoaded", () => {
     try {
       const blob = await Pixerase.request("/api/remove-object", form);
       if (resultUrl) URL.revokeObjectURL(resultUrl); resultUrl = URL.createObjectURL(blob); result.src = resultUrl; result.style.display = "block";
-      document.getElementById("downloadObjBtn").disabled = false; Pixerase.setStatus(status, "Your image is ready to download.", "success");
+      result.parentElement.classList.add("has-preview"); document.getElementById("downloadObjBtn").disabled = false; Pixerase.setStatus(status, "Your image is ready to download.", "success");
     } catch (error) { Pixerase.setStatus(status, error.message, "error"); }
     finally { button.disabled = false; drop.classList.remove("processing"); }
   });
   document.getElementById("clearObjBtn").addEventListener("click", () => {
     if (image.src.startsWith("blob:")) URL.revokeObjectURL(image.src); if (resultUrl) URL.revokeObjectURL(resultUrl);
-    image.removeAttribute("src"); image.style.display = "none"; result.removeAttribute("src"); result.style.display = "none"; canvas.style.display = "none"; input.value = ""; sourceFile = null; resultUrl = ""; clearCanvases(); document.getElementById("downloadObjBtn").disabled = true; Pixerase.setStatus(status, "");
+    image.removeAttribute("src"); image.style.display = "none"; image.parentElement.classList.remove("has-preview"); result.removeAttribute("src"); result.style.display = "none"; result.parentElement.classList.remove("has-preview"); canvas.style.display = "none"; input.value = ""; sourceFile = null; resultUrl = ""; clearCanvases(); document.getElementById("downloadObjBtn").disabled = true; Pixerase.setStatus(status, "");
   });
   document.getElementById("downloadObjBtn").addEventListener("click", () => { if (resultUrl) Pixerase.saveBlobUrl(resultUrl, "object-removed.png"); });
 });

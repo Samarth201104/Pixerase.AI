@@ -13,7 +13,9 @@ document.addEventListener("DOMContentLoaded", () => {
     sourceFile = file;
     before.src = URL.createObjectURL(file);
     before.style.display = "block";
+    before.parentElement.classList.add("has-preview");
     result.style.display = "none";
+    result.parentElement.classList.remove("has-preview");
     document.getElementById("downloadBgBtn").disabled = true;
     Pixerase.setStatus(status, "Image ready. Choose an edit to continue.");
   }
@@ -52,6 +54,7 @@ document.addEventListener("DOMContentLoaded", () => {
       resultUrl = URL.createObjectURL(blob);
       result.src = resultUrl;
       result.style.display = "block";
+      result.parentElement.classList.add("has-preview");
       document.getElementById("downloadBgBtn").disabled = false;
       Pixerase.setStatus(status, "Your image is ready to download.", "success");
     } catch (error) { Pixerase.setStatus(status, error.message, "error"); }
@@ -61,7 +64,7 @@ document.addEventListener("DOMContentLoaded", () => {
   document.getElementById("replaceBgBtn").addEventListener("click", () => process(true));
   document.getElementById("downloadBgBtn").addEventListener("click", () => { if (resultUrl) Pixerase.saveBlobUrl(resultUrl, "background-removed.png"); });
   document.getElementById("clearBgBtn").addEventListener("click", () => {
-    [before, result].forEach(image => { if (image.src.startsWith("blob:")) URL.revokeObjectURL(image.src); image.removeAttribute("src"); image.style.display = "none"; });
+    [before, result].forEach(image => { if (image.src.startsWith("blob:")) URL.revokeObjectURL(image.src); image.removeAttribute("src"); image.style.display = "none"; image.parentElement.classList.remove("has-preview"); });
     if (resultUrl) URL.revokeObjectURL(resultUrl);
     resultUrl = ""; sourceFile = null; template = ""; input.value = ""; document.getElementById("customBgFile").value = ""; document.getElementById("bgTemplateSelect").value = ""; document.getElementById("downloadBgBtn").disabled = true;
     document.querySelectorAll(".selectable-template").forEach(item => item.classList.remove("selected")); Pixerase.setStatus(status, "");
