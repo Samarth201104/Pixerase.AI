@@ -8,6 +8,8 @@ document.addEventListener("DOMContentLoaded", () => {
   const ctx = canvas.getContext("2d");
   const mask = document.createElement("canvas");
   const maskCtx = mask.getContext("2d", { willReadFrequently: true });
+  const eraseMask = document.createElement("canvas");
+  const eraseMaskCtx = eraseMask.getContext("2d", { willReadFrequently: true });
   let sourceFile = null;
   let resultUrl = "";
   let mode = "rect";
@@ -36,24 +38,36 @@ document.addEventListener("DOMContentLoaded", () => {
     const first = action.points[0];
     if (!first) return;
     ctx.beginPath(); ctx.moveTo(first.x, first.y); maskCtx.beginPath(); maskCtx.moveTo(first.x, first.y);
+    eraseMaskCtx.beginPath(); eraseMaskCtx.moveTo(first.x, first.y);
     for (const p of action.points.slice(1)) { ctx.lineTo(p.x, p.y); maskCtx.lineTo(p.x, p.y); }
-    if (action.points.length === 1) { ctx.lineTo(first.x + .01, first.y + .01); maskCtx.lineTo(first.x + .01, first.y + .01); }
+    for (const p of action.points.slice(1)) eraseMaskCtx.lineTo(p.x, p.y);
+    if (action.points.length === 1) {
+      ctx.lineTo(first.x + .01, first.y + .01); maskCtx.lineTo(first.x + .01, first.y + .01);
+      eraseMaskCtx.lineTo(first.x + .01, first.y + .01);
+    }
     ctx.strokeStyle = action.color === "erase" ? "rgba(90,130,255,.45)" : "rgba(255,56,96,.5)";
     maskCtx.strokeStyle = action.color === "erase" ? "black" : "white";
-    ctx.lineWidth = maskCtx.lineWidth = action.width; ctx.lineCap = maskCtx.lineCap = "round"; ctx.lineJoin = maskCtx.lineJoin = "round";
-    ctx.stroke(); maskCtx.stroke();
+    eraseMaskCtx.strokeStyle = action.color === "erase" ? "white" : "black";
+    ctx.lineWidth = maskCtx.lineWidth = eraseMaskCtx.lineWidth = action.width;
+    ctx.lineCap = maskCtx.lineCap = eraseMaskCtx.lineCap = "round";
+    ctx.lineJoin = maskCtx.lineJoin = eraseMaskCtx.lineJoin = "round";
+    ctx.stroke(); maskCtx.stroke(); eraseMaskCtx.stroke();
   }
   function redraw() {
-    ctx.clearRect(0, 0, canvas.width, canvas.height); maskCtx.clearRect(0, 0, mask.width, mask.height);
+    ctx.clearRect(0, 0, canvas.width, canvas.height); maskCtx.clearRect(0, 0, mask.width, mask.height); eraseMaskCtx.clearRect(0, 0, eraseMask.width, eraseMask.height);
     maskCtx.fillStyle = "black"; maskCtx.fillRect(0, 0, mask.width, mask.height); selections = [];
+    eraseMaskCtx.fillStyle = "black"; eraseMaskCtx.fillRect(0, 0, eraseMask.width, eraseMask.height);
     marks.forEach(drawAction);
   }
   function clearCanvases() {
     if (!canvas.width || !canvas.height) return;
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     maskCtx.clearRect(0, 0, mask.width, mask.height);
+    eraseMaskCtx.clearRect(0, 0, eraseMask.width, eraseMask.height);
     maskCtx.fillStyle = "black";
     maskCtx.fillRect(0, 0, mask.width, mask.height);
+    eraseMaskCtx.fillStyle = "black";
+    eraseMaskCtx.fillRect(0, 0, eraseMask.width, eraseMask.height);
     marks = []; redoMarks = []; current = null; selections = []; history();
   }
   function alignCanvas() {
@@ -76,13 +90,13 @@ document.addEventListener("DOMContentLoaded", () => {
     result.parentElement.classList.remove("has-preview");
     document.getElementById("downloadObjBtn").disabled = true;
     image.onload = () => {
-      canvas.width = mask.width = image.naturalWidth;
-      canvas.height = mask.height = image.naturalHeight;
+      canvas.width = mask.width = eraseMask.width = image.naturalWidth;
+      canvas.height = mask.height = eraseMask.height = image.naturalHeight;
       canvas.style.display = "block";
       clearCanvases();
       alignCanvas();
     };
-    Pixerase.setStatus(status, "Mark one or more objects with separate rectangles, or use the brush.");
+    Pixerase.setStatus(status, "Mark objects with rectangles and/or brush strokes. Use Eraser to refine your selection.");
   }
   document.getElementById("objSelect")?.addEventListener("click", event => { event.preventDefault(); event.stopPropagation(); input.click(); });
   document.getElementById("objSelect")?.addEventListener("keydown", event => { if (["Enter", " "].includes(event.key)) input.click(); });
@@ -118,15 +132,23 @@ document.addEventListener("DOMContentLoaded", () => {
       ctx.beginPath(); ctx.moveTo(start.x, start.y);
       ctx.strokeStyle = brushColor === "erase" ? "rgba(90,130,255,.45)" : "rgba(255,56,96,.5)";
       maskCtx.beginPath(); maskCtx.moveTo(start.x, start.y); maskCtx.strokeStyle = brushColor === "erase" ? "black" : "white";
+      eraseMaskCtx.beginPath(); eraseMaskCtx.moveTo(start.x, start.y); eraseMaskCtx.strokeStyle = brushColor === "erase" ? "white" : "black";
       const width = currentAction.width;
-      ctx.lineWidth = maskCtx.lineWidth = width; ctx.lineCap = maskCtx.lineCap = "round"; ctx.lineJoin = maskCtx.lineJoin = "round";
-      ctx.lineTo(start.x + .01, start.y + .01); ctx.stroke(); maskCtx.lineTo(start.x + .01, start.y + .01); maskCtx.stroke();
+      ctx.lineWidth = maskCtx.lineWidth = eraseMaskCtx.lineWidth = width;
+      ctx.lineCap = maskCtx.lineCap = eraseMaskCtx.lineCap = "round";
+      ctx.lineJoin = maskCtx.lineJoin = eraseMaskCtx.lineJoin = "round";
+      ctx.lineTo(start.x + .01, start.y + .01); ctx.stroke();
+      maskCtx.lineTo(start.x + .01, start.y + .01); maskCtx.stroke();
+      eraseMaskCtx.lineTo(start.x + .01, start.y + .01); eraseMaskCtx.stroke();
     }
   });
   canvas.addEventListener("pointermove", event => {
     if (!isDrawing) return;
     event.preventDefault(); const p = point(event); current = p;
-    if (mode === "brush") { currentAction.points.push(p); ctx.lineTo(p.x, p.y); ctx.stroke(); maskCtx.lineTo(p.x, p.y); maskCtx.stroke(); }
+    if (mode === "brush") {
+      currentAction.points.push(p); ctx.lineTo(p.x, p.y); ctx.stroke(); maskCtx.lineTo(p.x, p.y); maskCtx.stroke();
+      eraseMaskCtx.lineTo(p.x, p.y); eraseMaskCtx.stroke();
+    }
     else {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
       const sx = Math.min(start.x, p.x), sy = Math.min(start.y, p.y), width = Math.abs(p.x - start.x), height = Math.abs(p.y - start.y);
@@ -163,16 +185,32 @@ document.addEventListener("DOMContentLoaded", () => {
   redoBtn.addEventListener("click", () => { if (!redoMarks.length) return; marks.push(redoMarks.pop()); redraw(); history(); });
   document.getElementById("removeObjBtn").addEventListener("click", async () => {
     if (!sourceFile) { Pixerase.setStatus(status, "Choose an image to continue.", "error"); return; }
-    const form = new FormData(); form.append("image", sourceFile, sourceFile.name);
-    if (mode === "rect") {
-      if (!selections.length) { Pixerase.setStatus(status, "Draw a rectangle around each object you want removed.", "error"); return; }
-      form.append("mode", "rect"); form.append("rects", JSON.stringify(selections)); form.append("canvas_w", String(canvas.width)); form.append("canvas_h", String(canvas.height));
-    } else {
-      const pixels = maskCtx.getImageData(0, 0, mask.width, mask.height).data;
-      if (!pixels.some((value, index) => index % 4 === 0 && value > 0)) { Pixerase.setStatus(status, "Paint over the object before processing.", "error"); return; }
+    const pixels = maskCtx.getImageData(0, 0, mask.width, mask.height).data;
+    const hasBrushSelection = pixels.some((value, index) => index % 4 === 0 && value > 0);
+    const erasePixels = eraseMaskCtx.getImageData(0, 0, eraseMask.width, eraseMask.height).data;
+    const hasEraserMarks = erasePixels.some((value, index) => index % 4 === 0 && value > 0);
+    if (!selections.length && !hasBrushSelection) {
+      Pixerase.setStatus(status, "Mark at least one object with a rectangle or brush before processing.", "error");
+      return;
+    }
+    const form = new FormData();
+    form.append("image", sourceFile, sourceFile.name);
+    const modeForRequest = selections.length && hasBrushSelection ? "mixed" : (selections.length ? "rect" : "brush");
+    form.append("mode", modeForRequest);
+    if (selections.length) {
+      form.append("rects", JSON.stringify(selections));
+      form.append("canvas_w", String(canvas.width));
+      form.append("canvas_h", String(canvas.height));
+    }
+    if (hasBrushSelection) {
       const blob = await new Promise(resolve => mask.toBlob(resolve, "image/png"));
-      if (!blob) { Pixerase.setStatus(status, "The selection could not be prepared. Please try again.", "error"); return; }
-      form.append("mode", "brush"); form.append("mask", blob, "mask.png");
+      if (!blob) { Pixerase.setStatus(status, "The brush selection could not be prepared. Please try again.", "error"); return; }
+      form.append("mask", blob, "mask.png");
+    }
+    if (hasEraserMarks) {
+      const blob = await new Promise(resolve => eraseMask.toBlob(resolve, "image/png"));
+      if (!blob) { Pixerase.setStatus(status, "The eraser selection could not be prepared. Please try again.", "error"); return; }
+      form.append("erase_mask", blob, "erase-mask.png");
     }
     const button = document.getElementById("removeObjBtn"); button.disabled = true; drop.classList.add("processing");
     Pixerase.setStatus(status, "Processing your image. This can take a little while on a free server…");

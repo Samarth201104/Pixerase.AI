@@ -12,7 +12,7 @@ def _path_setting(name, default):
 class Config:
     FRONTEND_PATH = ROOT / "frontend"
     MAX_UPLOAD_SIZE = int(os.getenv("MAX_UPLOAD_SIZE", str(25 * 1024 * 1024)))
-    MAX_CONTENT_LENGTH = MAX_UPLOAD_SIZE * 2 + 1024 * 1024
+    MAX_CONTENT_LENGTH = MAX_UPLOAD_SIZE * 3 + 1024 * 1024
     MAX_IMAGE_PIXELS = int(os.getenv("MAX_IMAGE_PIXELS", "12000000"))
     BACKGROUND_MODEL_PATH = _path_setting("BACKGROUND_MODEL_PATH", ROOT / "backend/app/models/background/models/u2net.pth")
     OBJECT_MODEL_PATH = _path_setting("OBJECT_MODEL_PATH", ROOT / "backend/app/models/object/models/migan_512_places2.pt")

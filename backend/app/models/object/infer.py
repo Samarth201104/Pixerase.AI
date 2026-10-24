@@ -28,7 +28,7 @@ def grabcut_with_rect(image_path, rect, iter_count=5):
     return grabcut_with_rects(image_path, [rect], iter_count)
 
 
-def grabcut_with_rects(image_path, rects, iter_count=5):
+def grabcut_with_rects(image_path, rects, iter_count=5, output_path=None):
     image = cv2.imread(image_path)
     if image is None:
         raise FileNotFoundError(f"Image not found: {image_path}")
@@ -58,7 +58,7 @@ def grabcut_with_rects(image_path, rects, iter_count=5):
     if not np.any(combined_mask):
         raise ValueError("Select at least one area inside the image.")
 
-    mask_path = os.path.splitext(image_path)[0] + "_mask.png"
+    mask_path = output_path or os.path.splitext(image_path)[0] + "_mask.png"
     cv2.imwrite(mask_path, combined_mask)
     return mask_path
 
@@ -66,7 +66,7 @@ def grabcut_with_rects(image_path, rects, iter_count=5):
 # -------------------------
 # GrabCut (brush)
 # -------------------------
-def grabcut_with_brush(image_path, brush_mask_path, iter_count=5):
+def grabcut_with_brush(image_path, brush_mask_path, iter_count=5, output_path=None):
     image = cv2.imread(image_path)
     if image is None:
         raise FileNotFoundError(f"Image not found: {image_path}")
@@ -74,6 +74,8 @@ def grabcut_with_brush(image_path, brush_mask_path, iter_count=5):
     h, w = image.shape[:2]
 
     user_mask = cv2.imread(brush_mask_path, cv2.IMREAD_GRAYSCALE)
+    if user_mask is None:
+        raise ValueError("The brush selection could not be read. Please mark the object again.")
     user_mask = cv2.resize(user_mask, (w, h), interpolation=cv2.INTER_NEAREST)
     _, user_mask = cv2.threshold(user_mask, 10, 255, cv2.THRESH_BINARY)
 
@@ -99,7 +101,7 @@ def grabcut_with_brush(image_path, brush_mask_path, iter_count=5):
     final_mask = cv2.morphologyEx(filled, cv2.MORPH_CLOSE, kernel, iterations=3)
     final_mask = cv2.dilate(final_mask, kernel, iterations=2)
 
-    mask_path = os.path.splitext(image_path)[0] + "_mask.png"
+    mask_path = output_path or os.path.splitext(image_path)[0] + "_mask.png"
     cv2.imwrite(mask_path, final_mask)
     return mask_path
 

@@ -22,15 +22,14 @@ def remove_background(image, background, config):
     return composite_foreground_with_bg(image, refine_mask(mask), template)
 
 
-def remove_object(image_path, mask_path, output_path, mode, rect, canvas_size, model_path):
+def remove_object(image_path, mask_path, erase_mask_path, output_path, mode, rect, canvas_size, model_path):
+    import cv2
+    import numpy as np
     from app.models.object.infer import grabcut_with_brush, grabcut_with_rects, run_migan_inference
 
-    if mode == "brush":
-        if not mask_path:
-            raise ValueError("Paint over the object before processing.")
-        final_mask = grabcut_with_brush(str(image_path), str(mask_path))
-    else:
-        if not rect or not canvas_size or canvas_size[0] <= 0 or canvas_size[1] <= 0:
+    selection_masks = []
+    if rect:
+        if not canvas_size or canvas_size[0] <= 0 or canvas_size[1] <= 0:
             raise ValueError("Draw a selection around the object before processing.")
         rectangles = rect if isinstance(rect[0], (list, tuple)) else [rect]
         with Image.open(image_path) as image:
@@ -47,5 +46,31 @@ def remove_object(image_path, mask_path, output_path, mode, rect, canvas_size, m
             image_rectangles.append([x1, y1, x2 - x1, y2 - y1])
         if not image_rectangles:
             raise ValueError("Select an area inside the image.")
-        final_mask = grabcut_with_rects(str(image_path), image_rectangles)
+        if image_rectangles:
+            selection_masks.append(grabcut_with_rects(str(image_path), image_rectangles, output_path=str(Path(output_path).with_name("rect-mask.png"))))
+    if mask_path:
+        selection_masks.append(grabcut_with_brush(str(image_path), str(mask_path), output_path=str(Path(output_path).with_name("brush-mask.png"))))
+    if not selection_masks:
+        raise ValueError("Mark at least one object with a rectangle or brush before processing.")
+    final_mask = str(Path(output_path).with_name("combined-mask.png"))
+    combined = None
+    for selection_path in selection_masks:
+        current = cv2.imread(str(selection_path), cv2.IMREAD_GRAYSCALE)
+        if current is None:
+            raise ValueError("The marked object selection could not be processed. Please try again.")
+        if combined is None:
+            combined = current
+        else:
+            combined = cv2.bitwise_or(combined, current)
+    if erase_mask_path:
+        erase = cv2.imread(str(erase_mask_path), cv2.IMREAD_GRAYSCALE)
+        if erase is None:
+            raise ValueError("The eraser marks could not be processed. Please try again.")
+        if erase.shape != combined.shape:
+            erase = cv2.resize(erase, (combined.shape[1], combined.shape[0]), interpolation=cv2.INTER_NEAREST)
+        combined[erase > 10] = 0
+    if not np.any(combined):
+        raise ValueError("Your selection is empty after erasing. Mark an object area and try again.")
+    if not cv2.imwrite(final_mask, combined):
+        raise ValueError("The object selection mask could not be saved. Please try again.")
     return run_migan_inference(models.object(model_path), str(image_path), final_mask, str(output_path), device=models.device())
