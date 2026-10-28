@@ -262,7 +262,7 @@ The object route accepts up to 20 rectangles. The frontend sends coordinates rel
 
 ## License
 
-Pixerase.AI is intended for **educational purposes only**. There is no `LICENSE` file at the root of this repository, so Pixerase.AI does not currently grant a project-wide license. The educational-purpose statement is not a license and does not provide permission to copy, modify, redistribute, or commercially use this repository.
+You may use the original Pixerase.AI project material for **educational purposes**, including learning, coursework, and non-commercial experimentation. This educational-use permission does not grant commercial-use rights. There is no `LICENSE` file at the root of this repository, so no broader project-wide license is declared.
 
 Third-party components have separate terms:
 
@@ -270,7 +270,7 @@ Third-party components have separate terms:
 - The [MI-GAN upstream repository](https://github.com/Picsart-AI-Research/MI-GAN) provides separate MIT licenses for its code and pretrained weights ([code license](https://github.com/Picsart-AI-Research/MI-GAN/blob/main/LICENSE), [weights license](https://github.com/Picsart-AI-Research/MI-GAN/blob/main/LICENSE-WEIGHTS)). Those license files are not included in this repository.
 - Some vendored files under `backend/app/models/object/` contain NVIDIA copyright notices stating that use, reproduction, disclosure, or distribution without an express NVIDIA license agreement is prohibited. No such agreement is documented in this repository. The MI-GAN MIT terms should not be assumed to cover those files.
 
-Review the relevant upstream licenses, checkpoint terms, and notices before using or redistributing any component. The legal status of the bundled files needs review; this README is not legal advice.
+The educational-use permission applies only to original Pixerase.AI material. It does not override the upstream licenses, checkpoint terms, or notices for third-party components. Review those terms before using or redistributing third-party material. The licensing status of some bundled files still needs review; this README is not legal advice.
 
 ## Acknowledgments and references
 
