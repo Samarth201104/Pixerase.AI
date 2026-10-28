@@ -6,26 +6,6 @@ The application combines a Flask API with a vanilla HTML, CSS, and JavaScript in
 
 > **Educational use only.** This statement describes the project's purpose; it does not replace or override the licenses and usage conditions of third-party code, model weights, datasets, or other materials. Review those terms before copying, redistributing, or using any part of this repository.
 
-## Contents
-
-- [Features](#features)
-- [Screenshots](#screenshots)
-- [Technology](#technology)
-- [Architecture](#architecture)
-- [Repository structure](#repository-structure)
-- [Prerequisites](#prerequisites)
-- [Model weights and downloads](#model-weights-and-downloads)
-- [Local installation](#local-installation)
-- [Using the application](#using-the-application)
-- [Configuration](#configuration)
-- [API overview](#api-overview)
-- [Troubleshooting](#troubleshooting)
-- [Limitations and future work](#limitations-and-future-work)
-- [Contributing](#contributing)
-- [License and educational use](#license-and-educational-use)
-- [Acknowledgments and references](#acknowledgments-and-references)
-- [Project link](#project-link)
-
 ## Features
 
 - **Background removal:** predicts a foreground mask with U²-Net. The result can be a transparent PNG or composited over a supplied background image or the included template.
@@ -36,10 +16,6 @@ The application combines a Flask API with a vanilla HTML, CSS, and JavaScript in
 - **Temporary request files:** the API writes request files into a temporary workspace and cleans it up after the response closes. The app does not implement accounts, an image gallery, or image history. This describes application behavior and is not a guarantee about host-level logs or storage.
 
 The API defaults to a 25 MB upload limit and a 12-million-pixel decoded-image limit. The frontend and backend enforce their own input checks.
-
-## Screenshots
-
-No screenshots are currently included in the repository. Maintainers can add genuine captures under a `docs/screenshots/` directory and reference them here after adding the files.
 
 ## Technology
 
@@ -266,7 +242,7 @@ The object route accepts up to 20 rectangles. The frontend sends coordinates rel
 
 ### Possible improvements
 
-- Add verified screenshots and a short feature demo.
+- Add a short feature demo.
 - Add reproducible model checksums and a verified mapping for the supplied download links.
 - Add a documented license and attribution inventory after reviewing every vendored component and checkpoint.
 - Add performance benchmarks across image sizes and supported hardware.
@@ -284,18 +260,20 @@ The object route accepts up to 20 rectangles. The frontend sends coordinates rel
    These tests mock model processing and do not verify visual model quality or a full checkpoint inference.
 4. Describe the behavior changed and the checks you ran in your pull request. Include screenshots for visible UI changes when available.
 
-## License and educational use
+## License
 
-Pixerase.AI is intended for **educational purposes only**. There is no root `LICENSE` file in this repository, so no project-wide license is declared here. Do not interpret this README's educational-purpose statement as permission to use, distribute, or commercialize code or model weights.
+Pixerase.AI is intended for **educational purposes only**. There is no `LICENSE` file at the root of this repository, so Pixerase.AI does not currently grant a project-wide license. The educational-purpose statement is not a license and does not provide permission to copy, modify, redistribute, or commercially use this repository.
 
-The upstream U-2-Net repository includes an Apache License 2.0 for its project; the licensing terms for the particular pretrained checkpoint bundled here should still be confirmed. The upstream MI-GAN repository identifies MIT licensing for its code and has a separate `LICENSE-WEIGHTS` file for its weights. However, this repository also vendors files containing NVIDIA copyright and license-agreement notices, and it does not include a documented agreement covering their redistribution. Review those notices and applicable upstream terms before reusing or redistributing the bundled MI-GAN source. This README is not legal advice.
+Third-party components have separate terms:
+
+- The [U-2-Net upstream repository](https://github.com/xuebinqin/U-2-Net) provides its source under Apache License 2.0. This repository does not include that license text, and the provenance and terms for the specific bundled `u2net.pth` checkpoint have not been independently confirmed.
+- The [MI-GAN upstream repository](https://github.com/Picsart-AI-Research/MI-GAN) provides separate MIT licenses for its code and pretrained weights ([code license](https://github.com/Picsart-AI-Research/MI-GAN/blob/main/LICENSE), [weights license](https://github.com/Picsart-AI-Research/MI-GAN/blob/main/LICENSE-WEIGHTS)). Those license files are not included in this repository.
+- Some vendored files under `backend/app/models/object/` contain NVIDIA copyright notices stating that use, reproduction, disclosure, or distribution without an express NVIDIA license agreement is prohibited. No such agreement is documented in this repository. The MI-GAN MIT terms should not be assumed to cover those files.
+
+Review the relevant upstream licenses, checkpoint terms, and notices before using or redistributing any component. The legal status of the bundled files needs review; this README is not legal advice.
 
 ## Acknowledgments and references
 
 - **U²-Net:** Xuebin Qin, Zichen Zhang, Chenyang Huang, Masood Dehghan, Osmar R. Zaiane, and Martin Jagersand, [“U²-Net: Going Deeper with Nested U-Structure for Salient Object Detection”](https://arxiv.org/abs/2005.09007), Pattern Recognition 2020. [Official implementation and license](https://github.com/xuebinqin/U-2-Net).
 - **MI-GAN:** Andranik Sargsyan, Shant Navasardyan, Xingqian Xu, and Humphrey Shi, [“MI-GAN: A Simple Baseline for Image Inpainting on Mobile Devices”](https://openaccess.thecvf.com/content/ICCV2023/html/Sargsyan_MI-GAN_A_Simple_Baseline_for_Image_Inpainting_on_Mobile_Devices_ICCV_2023_paper.html), ICCV 2023. [Official implementation](https://github.com/Picsart-AI-Research/MI-GAN), [code license](https://github.com/Picsart-AI-Research/MI-GAN/blob/main/LICENSE), and [weights license](https://github.com/Picsart-AI-Research/MI-GAN/blob/main/LICENSE-WEIGHTS).
 - **OpenCV GrabCut:** used by the object-removal pipeline to refine marked regions before inpainting.
-
-## Project link
-
-[Pixerase.AI on GitHub](https://github.com/Samarth201104/Pixerase.AI)
