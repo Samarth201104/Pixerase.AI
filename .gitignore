@@ -12,6 +12,11 @@ venv/
 ENV/
 *.egg-info/
 .pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.tox/
+.nox/
+.hypothesis/
 .coverage
 htmlcov/
 
@@ -20,6 +25,8 @@ uploads/
 outputs/
 results/
 *.tmp
+*.swp
+*.swo
 *.log
 
 # Model caches and generated artifacts
